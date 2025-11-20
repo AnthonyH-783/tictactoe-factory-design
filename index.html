@@ -3,13 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=close" />
     <link rel="stylesheet" href="style.css">
+    <script src="node_modules/mustache/mustache.js"></script>
     <script src="script.js" defer></script>
     <title>Tic Tac Toe</title>
 </head>
 <body>
     <div class="container">
         <h1>Tic Tac Toe Game</h1>
+        <div id="gameboard">
+            <div id="top-row">
+                <div>
+                    <span><svg xmlns="http://www.w3.org/2000/svg" height="23px" viewBox="0 -1010 960 960" width="23px" fill="#000000"><path d="m291-240-51-51 189-189-189-189 51-51 189 189 189-189 51 51-189 189 189 189-51 51-189-189-189 189Z"/></svg></span>
+                    <span><svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#000000"><path d="M480.28-96Q401-96 331-126t-122.5-82.5Q156-261 126-330.96t-30-149.5Q96-560 126-629.5q30-69.5 82.5-122T330.96-834q69.96-30 149.5-30t149.04 30q69.5 30 122 82.5T834-629.28q30 69.73 30 149Q864-401 834-331t-82.5 122.5Q699-156 629.28-126q-69.73 30-149 30Zm-.28-72q130 0 221-91t91-221q0-130-91-221t-221-91q-130 0-221 91t-91 221q0 130 91 221t221 91Zm0-312Z"/></svg></span>
+                </div>
+                <div id="turn-wrapper">
+                    <script id="turn-template" type="template/text">
+                        <span> <svg xmlns="http://www.w3.org/2000/svg"
+                             height="{{dimension}}px" viewBox="0 -1010 960 960"
+                              width="{{dimension}}px" fill="{{color}}">
+                              <path d="{{path}}"/></svg></span>
+                        <span> Turn </span>
+                    </script>
+                </div>
+                <div>
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#000000"><path d="M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z"/></svg>
+                </div>
+            </div>
+            <div id="middle-rows">
+                <div class="grid-item"></div>
+                <div class="grid-item"></div>
+                <div class="grid-item"></div>
+                <div class="grid-item"></div>
+                <div class="grid-item"></div>
+                <div class="grid-item"></div>
+                <div class="grid-item"></div>
+                <div class="grid-item"></div>
+                <div class="grid-item"></div>
+            </div>
+            <div id="bottom-row">
+                <script id="scores-template" type="text/template">
+                    <div class="score-card">
+                        <span><svg xmlns="http://www.w3.org/2000/svg" height="23px" viewBox="0 -1200 960 960" width="23px" fill="#000000"><path d="m291-240-51-51 189-189-189-189 51-51 189 189 189-189 51 51-189 189 189 189-51 51-189-189-189 189Z"/></svg>(You)</span>
+                        <span>{{player_score}}<span>
+                        
+                    </div>
+                    <div class="score-card">
+                        <span>(Ties)</span>
+                        <span>{{num_ties}}<span>
+                    </div>
+                    <div class="score-card">
+                        <span><svg xmlns="http://www.w3.org/2000/svg" height="25px" viewBox="0 -1200 960 960" width="20px" fill="#000000"><path d="M480.28-96Q401-96 331-126t-122.5-82.5Q156-261 126-330.96t-30-149.5Q96-560 126-629.5q30-69.5 82.5-122T330.96-834q69.96-30 149.5-30t149.04 30q69.5 30 122 82.5T834-629.28q30 69.73 30 149Q864-401 834-331t-82.5 122.5Q699-156 629.28-126q-69.73 30-149 30Zm-.28-72q130 0 221-91t91-221q0-130-91-221t-221-91q-130 0-221 91t-91 221q0 130 91 221t221 91Zm0-312Z"/></svg>(CPU)</span>
+                        <span>{{comp_score}}<span>
+                    </div>
+                </script>
+            </div>
+        </div>
     </div>
     
 </body>
