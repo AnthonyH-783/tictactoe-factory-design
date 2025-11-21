@@ -48,7 +48,7 @@
     display: flex;
     justify-content: space-around;
 }
-#refresh{
+#reset{
     cursor: pointer;
 }
 .score-card{

@@ -63,12 +63,16 @@ const turn_module = (function (){
     let turn = 1; // Initial change is on O 
     // Event Listeners
     events.on("markedCell", _render);
+    events.on("resetGame", resetTurns);
     // Rendering
     function _render(){
         const symbol = (turn === 0) ? X : O;
         turn_wrapper.innerHTML = Mustache.render(turn_template, symbol);
         turn = (turn + 1) % 2;
-
+    }
+    function resetTurns(){
+        turn_wrapper.innerHTML = Mustache.render(turn_template, X);
+        turn = 1;
     }
 
 })();
@@ -82,6 +86,7 @@ const score_module = (function (){
     // Event Listeners
     events.on("win", updateWinnerScore);
     events.on("draw", recordDraw);
+    events.on("resetGame", resetScores);
     // Rendering
     function _render(){
         scores_wrapper.innerHTML = Mustache.render(scores_template, scores);
@@ -97,59 +102,35 @@ const score_module = (function (){
         scores.num_ties += 1;
         _render();
     }
+    function resetScores(){
+        for(const key in scores){
+            scores[key] = 0;
+        }
+        _render();
+    }
 
 
 })();
-const createPlayer = function(id){
-    // Counter for number of times a particular row/col/diagonal is used
-    // [row0, row1, row2, col0, col1, col2, diag1, diag2]
-    // When one of the above reaches 3, we have a winning condition
-    const personal_counter = new Array(8).fill(0); 
-    let score = 0; 
 
-    function move(row, col){
-        row = parseInt(row);
-        col = parseInt(col);
-        // Row and Column counter automatically incremented
-        personal_counter[row] += 1;
-        personal_counter[col + 3] += 1; // + 3 because col index is shifted by 3 in personal_counter
-        // Incrementing diagonal patterns
-        if(row === col){
-            personal_counter[6] += 1; // main diagonal
-        }
-        if(row + col === 2){
-            personal_counter[7] += 1; // counter diagonal
-        }
-    }
-    function isWinner(){
-        if(personal_counter.includes(3)){
-            events.emit("win", id);
-            return true;
-        }
-        return false;
-    }
-    function reset(){
-        personal_counter.fill(0);
-    }
-        
-    return {id, move, isWinner, reset};
-};
 // Gameboard Module
 const gameBoard = (function () {
 
     const first_player = createPlayer("X");
     const second_player = createPlayer("O");
-    const GRID_SIZE = init.data.DIMENSION;
+    const DIMENSION = init.data.DIMENSION;
     const board_dom = init.gameboard;
-    const scores = init.data.scores;
+    const grid_dom = board_dom.children[1].children;
     const board = createGameBoard();
     let turn = 0;
     let moves = 0;
     const turn_map = {0: "X", 1: "O"};
 
-
     // Event Listeners
     board_dom.addEventListener("click", drawSymbol);
+    board_dom.addEventListener("click", reset);
+    events.on("win", clearBoard);
+    events.on("draw", clearBoard);
+    events.on("resetGame", clearBoard);
     
     //board_dom.addEventListener("click", reset);
     // Render Function
@@ -170,9 +151,11 @@ const gameBoard = (function () {
             player.move(row, col);
             _render(event.target.firstChild);
             if(player.isWinner()){
+                
                 alert(`Player ${player.id} wins this round!`);
             }
             if(moves === 9){
+                alert("Tie! Nobody wins this round");
                 events.emit("draw");
             }
         }
@@ -182,6 +165,26 @@ const gameBoard = (function () {
         const col = parseInt(event.target.dataset.col);
         return board[row][col] === null;
     }
+
+    function reset(event){
+        if(event.target.id === "reset"){
+            events.emit("resetGame");
+        }
+    }
+
+    function clearBoard(){
+        for(let row = 0; row < DIMENSION; row++){
+            for(let col = 0; col < DIMENSION; col++){
+                board[row][col] = null;
+            }
+        }
+        for(grid_item of grid_dom){
+            grid_item.firstChild.innerHTML = "";
+        }
+        moves = 0;
+        turn = 0;
+    }
+    
 
     
     function createGameBoard(){
@@ -194,3 +197,44 @@ const gameBoard = (function () {
 
 })();
 
+
+function createPlayer(id){
+    // Counter for number of times a particular row/col/diagonal is used
+    // [row0, row1, row2, col0, col1, col2, diag1, diag2]
+    // When one of the above reaches 3, we have a winning condition
+    const personal_counter = new Array(8).fill(0); 
+  
+
+    // Event listeners
+    events.on("win", reset);
+    events.on("draw", reset);
+    events.on("resetGame", reset);
+
+    function move(row, col){
+        row = parseInt(row);
+        col = parseInt(col);
+        // Row and Column counter automatically incremented
+        personal_counter[row] += 1;
+        personal_counter[col + 3] += 1; // + 3 because col index is shifted by 3 in personal_counter
+        // Incrementing diagonal patterns
+        if(row === col){
+            personal_counter[6] += 1; // main diagonal
+        }
+        if(row + col === 2){
+            personal_counter[7] += 1; // counter diagonal
+        }
+    }
+    function isWinner(){
+        if(personal_counter.includes(3)){
+            events.emit("win", id);
+            return true;
+            
+        }
+        return false;
+    }
+    function reset(){
+        personal_counter.fill(0);
+    }
+        
+    return {id, move, isWinner, reset};
+};
