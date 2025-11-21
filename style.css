@@ -30,16 +30,26 @@
 .grid-item{
     padding: 4em;
     border: 1px solid black;
-    min-height: 3em;
-    min-width: 3em;
+    width: 10em;
+    height: 8em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
 }
-.grid-item:hover{
+.grid-item span{
+    font-size: 4em;
+}
+.grid-item:active{
     cursor: pointer;
     background-color: gainsboro;
 }
 #bottom-row{
     display: flex;
     justify-content: space-around;
+}
+#refresh{
+    cursor: pointer;
 }
 .score-card{
     display: flex;
