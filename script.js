@@ -53,6 +53,25 @@ const init = (function (){
 })(); // End init module
 
 // Turn Module
+const turn_module = (function (){
+
+    // Data
+    const turn_wrapper = init.wrappers.turn_wrapper;
+    const turn_template = init.templates.turn_template;
+    const X = init.graphics.X;
+    const O = init.graphics.O;
+    let turn = 1; // Initial change is on O 
+    // Event Listeners
+    events.on("markedCell", _render);
+    // Rendering
+    function _render(){
+        const symbol = (turn === 0) ? X : O;
+        turn_wrapper.innerHTML = Mustache.render(turn_template, symbol);
+        turn = (turn + 1) % 2;
+
+    }
+
+})();
 // Score module
 const createPlayer = function(id){
     // Counter for number of times a particular row/col/diagonal is used
@@ -66,17 +85,21 @@ const createPlayer = function(id){
         col = parseInt(col);
         // Row and Column counter automatically incremented
         personal_counter[row] += 1;
-        personal_counter[parseInt(col) + 3] += 1; // + 3 because col index is shifted by 3 in personal_counter
+        personal_counter[col + 3] += 1; // + 3 because col index is shifted by 3 in personal_counter
         // Incrementing diagonal patterns
         if(row === col){
             personal_counter[6] += 1; // main diagonal
         }
-        if(parseInt(row) + parseInt(col) === 2){
+        if(row + col === 2){
             personal_counter[7] += 1; // counter diagonal
         }
     }
     function isWinner(){
-        return personal_counter.includes(3);
+        if(personal_counter.includes(3)){
+            events.emit("endRound", id);
+            return true;
+        }
+        return false;
     }
     function reset(){
         personal_counter.fill(0);
@@ -99,11 +122,13 @@ const gameBoard = (function () {
 
     // Event Listeners
     board_dom.addEventListener("click", drawSymbol);
+    events.on("")
     //board_dom.addEventListener("click", reset);
     // Render Function
     function _render(cell){
 
         cell.innerHTML = turn_map[turn];
+        events.emit("markedCell");
         turn = (turn + 1) % 2;
 
     }
