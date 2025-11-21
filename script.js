@@ -44,11 +44,11 @@ const init = (function (){
         }
 
     })();
-        return {data: {DIMENSION, scores},
-        graphics: {X, O},
-        wrappers: {turn_wrapper, scores_wrapper},
-        templates: {turn_template, scores_template},
-        gameboard};
+    return {data: {DIMENSION, scores},
+    graphics: {X, O},
+    wrappers: {turn_wrapper, scores_wrapper},
+    templates: {turn_template, scores_template},
+    gameboard};
 
 })(); // End init module
 
@@ -73,6 +73,33 @@ const turn_module = (function (){
 
 })();
 // Score module
+const score_module = (function (){
+    // Data
+    const scores_wrapper = init.wrappers.scores_wrapper;
+    const scores_template = init.templates.scores_template;
+    const scores = init.data.scores;
+    const map = {"X": "player_score", "O": "comp_score"};
+    // Event Listeners
+    events.on("win", updateWinnerScore);
+    events.on("draw", recordDraw);
+    // Rendering
+    function _render(){
+        scores_wrapper.innerHTML = Mustache.render(scores_template, scores);
+
+    }
+    // Logic
+    function updateWinnerScore(id){
+        const key = map[id];
+        scores[key] += 1;
+        _render();
+    }
+    function recordDraw(){
+        scores.num_ties += 1;
+        _render();
+    }
+
+
+})();
 const createPlayer = function(id){
     // Counter for number of times a particular row/col/diagonal is used
     // [row0, row1, row2, col0, col1, col2, diag1, diag2]
@@ -96,7 +123,7 @@ const createPlayer = function(id){
     }
     function isWinner(){
         if(personal_counter.includes(3)){
-            events.emit("endRound", id);
+            events.emit("win", id);
             return true;
         }
         return false;
@@ -117,24 +144,26 @@ const gameBoard = (function () {
     const scores = init.data.scores;
     const board = createGameBoard();
     let turn = 0;
+    let moves = 0;
     const turn_map = {0: "X", 1: "O"};
 
 
     // Event Listeners
     board_dom.addEventListener("click", drawSymbol);
-    events.on("")
+    
     //board_dom.addEventListener("click", reset);
     // Render Function
     function _render(cell){
 
         cell.innerHTML = turn_map[turn];
         events.emit("markedCell");
+        moves++;
         turn = (turn + 1) % 2;
 
     }
     // Backend Functions
     function drawSymbol(event){
-        if(event.target.classList.contains("grid-item")){
+        if(event.target.classList.contains("grid-item") && isSelectedCellEmpty(event)){
             const player = (turn % 2 === 0) ? first_player : second_player;
             const [row, col] = [parseInt(event.target.dataset.row), parseInt(event.target.dataset.col)];
             board[row][col] = turn_map[turn];
@@ -143,7 +172,15 @@ const gameBoard = (function () {
             if(player.isWinner()){
                 alert(`Player ${player.id} wins this round!`);
             }
+            if(moves === 9){
+                events.emit("draw");
+            }
         }
+    }
+    function isSelectedCellEmpty(event){
+        const row = parseInt(event.target.dataset.row);
+        const col = parseInt(event.target.dataset.col);
+        return board[row][col] === null;
     }
 
     
